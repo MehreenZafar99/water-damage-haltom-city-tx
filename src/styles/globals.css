@@ -20,7 +20,9 @@ a{color:inherit}
 
 /* Side rail header (desktop), top bar (mobile) */
 .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-.rail{background:var(--navy);color:#cfd9e4;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:28px 24px;gap:28px}
+.rail{background:var(--navy);color:#cfd9e4;position:sticky;top:0;height:100vh;max-height:100vh;display:flex;flex-direction:column;padding:24px 20px;gap:20px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+.rail::-webkit-scrollbar{width:6px}
+.rail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:4px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo-mark{width:40px;height:40px;background:var(--amber);border-radius:4px;display:grid;place-items:center;flex:none}
 .logo strong{display:block;font-family:"Zilla Slab",serif;font-size:19px;color:var(--white);line-height:1.05}
@@ -28,9 +30,9 @@ a{color:inherit}
 .rail nav ul{list-style:none;display:flex;flex-direction:column;gap:2px}
 .rail nav a{display:block;padding:9px 10px;border-radius:4px;text-decoration:none;font-weight:600;font-size:15px;color:#dbe4ee;border-left:3px solid transparent}
 .rail nav a:hover,.rail nav a[aria-current]{background:rgba(255,255,255,.06);border-left-color:var(--amber);color:var(--white)}
-.rail-call{margin-top:auto;background:rgba(255,255,255,.06);border-radius:6px;padding:18px}
-.rail-call small{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
-.rail-call p{font-size:13px;margin-top:6px;color:#9fb0c2}
+.rail-call{margin-top:auto;background:rgba(255,255,255,.06);border-radius:6px;padding:14px;flex:none}
+.rail-call small{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.rail-call p{font-size:13px;margin-top:8px;color:#9fb0c2;line-height:1.4}
 .mtop{display:none}
 
 /* 1. Hero + call */
@@ -191,16 +193,16 @@ a{color:inherit}
 .bigcall a.huge{display:inline-block;font-family:"Zilla Slab",serif;font-size:clamp(40px,7vw,76px);font-weight:700;color:var(--amber);text-decoration:none;margin:10px 0}
 .bigcall p.bigcall-btn-wrap{margin:14px 0 10px}
 .bigcall .btn-phone{font-size:18px;padding:14px 28px}
-footer.site{background:#0a1e31;color:#9fb0c2;font-size:14px;padding:36px 0 100px}
-footer .wrap{display:grid;grid-template-columns:1.4fr 1fr auto;gap:28px;align-items:start}
-.foot-brand strong{display:block;font-family:"Zilla Slab",serif;font-size:18px;color:var(--white);margin-bottom:8px;font-weight:700}
-.foot-brand p{line-height:1.55;margin:0}
-.foot-contact .btn-phone{display:inline-flex;margin-bottom:8px}
+footer.site{background:#0a1e31;color:#9fb0c2;font-size:14px;padding:28px 0 32px}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr auto;gap:20px 28px;align-items:start}
+.foot-brand strong{display:block;font-family:"Zilla Slab",serif;font-size:18px;color:var(--white);margin-bottom:6px;font-weight:700}
+.foot-brand p{line-height:1.5;margin:0}
+.foot-contact .btn-phone{display:inline-flex;margin-bottom:6px}
 .mobilebar a,.mobilebar a:hover,.mobilebar a:focus{color:var(--navy)}
-.foot-links{display:flex;flex-direction:column;gap:8px;text-align:right}
+.foot-links{display:flex;flex-direction:column;gap:6px;text-align:right}
 .foot-links a{text-decoration:none;color:#9fb0c2}
 .foot-links a:hover{color:var(--amber)}
-.foot-copy{grid-column:1/-1;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);font-size:13px}
+.foot-copy{grid-column:1/-1;padding-top:14px;margin-top:4px;border-top:1px solid rgba(255,255,255,.1);font-size:13px}
 .mobilebar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--amber);z-index:60;box-shadow:0 -6px 20px rgba(0,0,0,.2)}
 .mobilebar a{display:flex;justify-content:center;align-items:center;gap:10px;padding:16px;font-weight:700;font-size:19px;color:var(--navy);text-decoration:none}
 
@@ -231,6 +233,7 @@ footer .wrap{display:grid;grid-template-columns:1.4fr 1fr auto;gap:28px;align-it
   .entries,.ins-grid{grid-template-columns:1fr}
   .ins-col{border-right:0;border-bottom:1px solid var(--line)}
   footer .wrap{grid-template-columns:1fr;gap:20px}
+  footer.site{padding-bottom:88px}
   .foot-links{text-align:left}
   .mobilebar{display:block}
 }

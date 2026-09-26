@@ -30,9 +30,6 @@ export function BigCall({
     <section className="bigcall">
       <div className="wrap">
         <h2>{heading}</h2>
-        <a className="huge" href={`tel:${siteConfig.phoneTel}`}>
-          {siteConfig.phoneDisplay}
-        </a>
         <p className="bigcall-btn-wrap">
           <a className="btn-phone" href={`tel:${siteConfig.phoneTel}`}>
             Call {siteConfig.phoneDisplay}

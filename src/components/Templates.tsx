@@ -5,7 +5,7 @@ import {
   getServicePages,
 } from "@/lib/content";
 import { NEIGHBORHOOD_PROBLEMS } from "@/lib/site-data";
-import { MarkdownBlock } from "@/lib/markdown";
+import { MarkdownBlock, hasPhoneMention, stripPhoneMentions } from "@/lib/markdown";
 import { extractFaqs, parsePage } from "@/lib/parse-page";
 import {
   BigCall,
@@ -69,7 +69,11 @@ export function ServiceTemplate({ page }: { page: ContentPage }) {
         <div className="wrap">
           <span className="kicker">Service</span>
           <h1>{parsed.h1}</h1>
-          {parsed.lead && <p className="lead">{parsed.lead}</p>}
+          {parsed.lead && (
+            <p className="lead">
+              {hasPhoneMention(parsed.lead) ? stripPhoneMentions(parsed.lead) : parsed.lead}
+            </p>
+          )}
           <PhoneLink />
           <div className="glance">
             <div>
@@ -92,7 +96,13 @@ export function ServiceTemplate({ page }: { page: ContentPage }) {
           <div className="prose">
             {parsed.intro && (
               <section>
-                <MarkdownBlock source={parsed.intro} />
+                <MarkdownBlock
+                  source={
+                    hasPhoneMention(parsed.intro)
+                      ? stripPhoneMentions(parsed.intro)
+                      : parsed.intro
+                  }
+                />
               </section>
             )}
             {contentSections.map((s) => (
@@ -167,10 +177,18 @@ export function NeighborhoodTemplate({ page }: { page: ContentPage }) {
         <header className="page-head" style={{ background: "transparent", border: 0, padding: "8px 0 24px" }}>
           <span className="kicker">Neighborhood</span>
           <h1>{parsed.h1}</h1>
-          {parsed.lead && <p>{parsed.lead}</p>}
+          {parsed.lead && (
+            <p>
+              {hasPhoneMention(parsed.lead) ? stripPhoneMentions(parsed.lead) : parsed.lead}
+            </p>
+          )}
           {!parsed.lead && introFirst && (
             <div className="prose">
-              <MarkdownBlock source={introFirst} />
+              <MarkdownBlock
+                source={
+                  hasPhoneMention(introFirst) ? stripPhoneMentions(introFirst) : introFirst
+                }
+              />
             </div>
           )}
           <PhoneLink />
@@ -178,12 +196,22 @@ export function NeighborhoodTemplate({ page }: { page: ContentPage }) {
         <div className="prose">
           {parsed.intro && parsed.lead && (
             <section>
-              <MarkdownBlock source={parsed.intro} />
+              <MarkdownBlock
+                source={
+                  hasPhoneMention(parsed.intro)
+                    ? stripPhoneMentions(parsed.intro)
+                    : parsed.intro
+                }
+              />
             </section>
           )}
           {parsed.intro && !parsed.lead && introRest && (
             <section>
-              <MarkdownBlock source={introRest} />
+              <MarkdownBlock
+                source={
+                  hasPhoneMention(introRest) ? stripPhoneMentions(introRest) : introRest
+                }
+              />
             </section>
           )}
           {contentSections.map((s) => (
@@ -602,9 +630,6 @@ export function ContactTemplate({ page }: { page: ContentPage }) {
           </span>
           <h1>{parsed.h1}</h1>
           <p>The fastest way to reach us is by phone. A real person answers every call.</p>
-          <a className="huge" href={`tel:${siteConfig.phoneTel}`}>
-            {siteConfig.phoneDisplay}
-          </a>
           <p style={{ marginTop: 16 }}>
             <PhoneLink />
           </p>

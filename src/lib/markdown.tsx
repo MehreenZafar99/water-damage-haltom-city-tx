@@ -6,6 +6,13 @@ function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+const PHONE_NUM_RE = (() => {
+  const phone = escapeRegExp(siteConfig.phoneDisplay);
+  const placeholder = escapeRegExp(siteConfig.phonePlaceholder);
+  return `(?:${phone}|${placeholder}|\\(817\\)\\s*XXX-XXXX)`;
+})();
+
+/** Orange CTA button — only for explicit tel: markdown links */
 function phoneButton(key: number) {
   return (
     <a key={key} className="btn-phone btn-phone-sm" href={`tel:${siteConfig.phoneTel}`}>
@@ -14,25 +21,36 @@ function phoneButton(key: number) {
   );
 }
 
-/** Split plain text and turn phone numbers into buttons */
-function withPhoneButtons(text: string, keyStart: number): React.ReactNode[] {
-  const phone = escapeRegExp(siteConfig.phoneDisplay);
-  const placeholder = escapeRegExp(siteConfig.phonePlaceholder);
-  const re = new RegExp(`(\\*\\*)?(?:${phone}|${placeholder}|\\(817\\)\\s*XXX-XXXX)(\\*\\*)?`, "g");
+/** Inline clickable number in body copy (not a box) */
+function phoneText(key: number) {
+  return (
+    <a key={key} className="phone-text" href={`tel:${siteConfig.phoneTel}`}>
+      {siteConfig.phoneDisplay}
+    </a>
+  );
+}
+
+function isPhoneish(label: string, href = "") {
+  return /tel:/i.test(href) || /\(817\)|call\s*\(/i.test(label);
+}
+
+/** Split plain text and turn phone numbers into inline links */
+function withPhoneText(text: string, keyStart: number): React.ReactNode[] {
+  const re = new RegExp(PHONE_NUM_RE, "g");
   const nodes: React.ReactNode[] = [];
   let last = 0;
   let m: RegExpExecArray | null;
   let key = keyStart;
   while ((m = re.exec(text))) {
     if (m.index > last) nodes.push(text.slice(last, m.index));
-    nodes.push(phoneButton(key++));
+    nodes.push(phoneText(key++));
     last = m.index + m[0].length;
   }
   if (last < text.length) nodes.push(text.slice(last));
   return nodes.length ? nodes : [text];
 }
 
-/** Inline markdown: bold links, links, bold, italic, phone buttons */
+/** Inline markdown: bold links, links, bold, italic, phone text links */
 export function inline(text: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
   const re =
@@ -43,14 +61,13 @@ export function inline(text: string): React.ReactNode[] {
   const src = applyPhone(text);
   while ((m = re.exec(src))) {
     if (m.index > last) {
-      nodes.push(...withPhoneButtons(src.slice(last, m.index), key));
+      nodes.push(...withPhoneText(src.slice(last, m.index), key));
       key += 10;
     }
     const token = m[0];
     const boldLink = token.match(/^\*\*\[([^\]]+)\]\(([^)]+)\)\*\*$/);
     if (boldLink) {
-      // If the link text is a phone / call CTA, render as phone button
-      if (/817|call/i.test(boldLink[1]) && /tel:|817/i.test(boldLink[2] + boldLink[1])) {
+      if (isPhoneish(boldLink[1], boldLink[2])) {
         nodes.push(phoneButton(key++));
       } else {
         nodes.push(
@@ -62,7 +79,7 @@ export function inline(text: string): React.ReactNode[] {
     } else {
       const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       if (link) {
-        if (link[2].startsWith("tel:") || /817/.test(link[1])) {
+        if (isPhoneish(link[1], link[2])) {
           nodes.push(phoneButton(key++));
         } else {
           nodes.push(
@@ -73,24 +90,49 @@ export function inline(text: string): React.ReactNode[] {
         }
       } else if (token.startsWith("**") && token.endsWith("**")) {
         const inner = token.slice(2, -2);
-        if (inner === siteConfig.phoneDisplay || /\(817\)/.test(inner)) {
-          nodes.push(phoneButton(key++));
+        if (new RegExp(`^${PHONE_NUM_RE}$`).test(inner) || inner === siteConfig.phoneDisplay) {
+          nodes.push(phoneText(key++));
+        } else if (/\(817\)/.test(inner)) {
+          // e.g. "Call (817) ..." inside bold — keep words, link the number
+          nodes.push(<strong key={key++}>{withPhoneText(inner, key)}</strong>);
+          key += 10;
         } else {
           nodes.push(<strong key={key++}>{inner}</strong>);
         }
       } else if (token.startsWith("*") && token.endsWith("*")) {
         nodes.push(<em key={key++}>{token.slice(1, -1)}</em>);
       } else {
-        nodes.push(...withPhoneButtons(token, key));
+        nodes.push(...withPhoneText(token, key));
         key += 10;
       }
     }
     last = m.index + token.length;
   }
   if (last < src.length) {
-    nodes.push(...withPhoneButtons(src.slice(last), key));
+    nodes.push(...withPhoneText(src.slice(last), key));
   }
   return nodes;
+}
+
+/** Replace phone CTAs in copy when a PhoneLink button already sits nearby */
+export function stripPhoneMentions(text: string): string {
+  return applyPhone(text)
+    .replace(
+      new RegExp(
+        `\\b(?:[Cc]all(?:\\s+us)?(?:\\s+at)?|[Dd]ial)\\s*(?:\\*\\*)?${PHONE_NUM_RE}(?:\\*\\*)?`,
+        "g"
+      ),
+      "call us"
+    )
+    .replace(new RegExp(`(?:\\*\\*)?${PHONE_NUM_RE}(?:\\*\\*)?`, "g"), "us")
+    .replace(/\bcall us\s+us\b/gi, "call us")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+\./g, ".")
+    .trim();
+}
+
+export function hasPhoneMention(text: string): boolean {
+  return new RegExp(PHONE_NUM_RE, "i").test(applyPhone(text)) || /tel:/i.test(text);
 }
 
 function parseTable(rows: string[]): React.ReactNode {
@@ -242,6 +284,22 @@ export function MarkdownBlock({ source }: { source: string }) {
   for (let bi = 0; bi < blocks.length; bi++) {
     const block = blocks[bi].trim();
     if (!block || block === "---") continue;
+
+    // Standalone phone CTA line → one button (not duplicated text+button)
+    if (
+      new RegExp(
+        `^(?:Call\\s+)?(?:\\*\\*)?${PHONE_NUM_RE}(?:\\*\\*)?\\.?$`,
+        "i"
+      ).test(block.replace(/\n/g, " ").trim()) ||
+      /^\[?\s*Call[^\]]*\]?$/i.test(block.trim())
+    ) {
+      out.push(
+        <p key={bi}>
+          {phoneButton(bi)}
+        </p>
+      );
+      continue;
+    }
 
     if (block.includes("|") && block.split("\n").some((l) => l.includes("|"))) {
       const rows = block.split("\n").filter((l) => l.includes("|"));

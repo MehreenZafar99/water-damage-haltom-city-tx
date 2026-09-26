@@ -20,7 +20,7 @@ export function PhoneLink({
 }
 
 export function BigCall({
-  heading = "Water damage will not wait. Neither will we.",
+  heading = "Need help now?",
   sub = `24 hours a day, every neighborhood in ${siteConfig.city}, ${siteConfig.state}`,
 }: {
   heading?: string;

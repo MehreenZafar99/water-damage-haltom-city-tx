@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import siteConfig from "../../site.config";
 import { NEIGHBORHOOD_PROBLEMS } from "@/lib/site-data";
 import { BigCall, FaqAccordion, SiteFooter } from "./Shared";
@@ -158,7 +158,6 @@ const TRIAGE = [
 ];
 
 export default function HomePage() {
-  const [active, setActive] = useState(0);
   const phone = siteConfig.phoneDisplay;
   const tel = siteConfig.phoneTel;
 
@@ -224,54 +223,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="triage">
+      <section className="triage" id="first-steps">
         <div className="wrap">
           <span className="kicker">First steps</span>
           <h2 className="triage-h">What is happening at your property right now?</h2>
-          <p className="lead">Pick what you see to get the first steps to take before our crew arrives.</p>
-          <div className="picker" role="tablist" aria-label="Choose your water problem">
-            {TRIAGE.map((t, i) => (
-              <button
-                key={t.id}
-                className="pick"
-                role="tab"
-                type="button"
-                id={t.id}
-                aria-controls={`p${i + 1}`}
-                aria-selected={active === i}
-                tabIndex={active === i ? 0 : -1}
-                onClick={() => setActive(i)}
-              >
+          <p className="lead">
+            Jump to what you see for the first steps to take before our crew arrives. Every situation
+            below is listed in full so you can read each one.
+          </p>
+          <nav className="picker" aria-label="Jump to a water problem">
+            {TRIAGE.map((t) => (
+              <a key={t.id} className="pick" href={`#${t.id}`}>
                 {t.icon}
                 {t.label}
-              </button>
+              </a>
+            ))}
+          </nav>
+          <div className="panels">
+            {TRIAGE.map((t) => (
+              <article className="panel" id={t.id} key={t.id}>
+                <div>
+                  <h3>{t.title}</h3>
+                  <p>{t.lead}</p>
+                  <ol>
+                    {t.steps.map((s) => (
+                      <li key={s}>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+                <div className="side">
+                  <a className="btn-phone" href={`tel:${tel}`}>
+                    Call {phone}
+                  </a>
+                  <p>{t.note}</p>
+                  <a className="more" href={t.more.href}>
+                    {t.more.label} &rarr;
+                  </a>
+                </div>
+              </article>
             ))}
           </div>
-          {TRIAGE.map((t, i) => (
-            <div
-              key={t.id}
-              className="panel"
-              role="tabpanel"
-              id={`p${i + 1}`}
-              aria-labelledby={t.id}
-              hidden={active !== i}
-            >
-              <div>
-                <h2>{t.title}</h2>
-                <p>{t.lead}</p>
-                <ol>
-                  {t.steps.map((s) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ol>
-              </div>
-              <div className="side">
-                <a className="btn-phone" href={`tel:${tel}`}>Call {phone}</a>
-                <p>{t.note}</p>
-                <a className="more" href={t.more.href}>{t.more.label} &rarr;</a>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 

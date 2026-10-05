@@ -227,41 +227,55 @@ export default function HomePage() {
         <div className="wrap">
           <span className="kicker">First steps</span>
           <h2 className="triage-h">What is happening at your property right now?</h2>
-          <p className="lead">
-            Jump to what you see for the first steps to take before our crew arrives. Every situation
-            below is listed in full so you can read each one.
-          </p>
-          <nav className="picker" aria-label="Jump to a water problem">
-            {TRIAGE.map((t) => (
-              <a key={t.id} className="pick" href={`#${t.id}`}>
-                {t.icon}
-                {t.label}
-              </a>
+          <p className="lead">Pick what you see to get the first steps to take before our crew arrives.</p>
+          <div className="triage-tabs">
+            {TRIAGE.map((t, i) => (
+              <input
+                key={`radio-${t.id}`}
+                className="triage-radio"
+                type="radio"
+                name="triage-tab"
+                id={`tab-${t.id}`}
+                defaultChecked={i === 0}
+              />
             ))}
-          </nav>
-          <div className="panels">
-            {TRIAGE.map((t) => (
-              <article className="panel" id={t.id} key={t.id}>
-                <div>
-                  <h3>{t.title}</h3>
-                  <p>{t.lead}</p>
-                  <ol>
-                    {t.steps.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ol>
-                </div>
-                <div className="side">
-                  <a className="btn-phone" href={`tel:${tel}`}>
-                    Call {phone}
-                  </a>
-                  <p>{t.note}</p>
-                  <a className="more" href={t.more.href}>
-                    {t.more.label} &rarr;
-                  </a>
-                </div>
-              </article>
-            ))}
+            <div className="picker" role="tablist" aria-label="Choose your water problem">
+              {TRIAGE.map((t) => (
+                <label key={t.id} className="pick" htmlFor={`tab-${t.id}`} id={t.id}>
+                  {t.icon}
+                  {t.label}
+                </label>
+              ))}
+            </div>
+            <div className="panels">
+              {TRIAGE.map((t) => (
+                <article
+                  className={`panel panel-${t.id}`}
+                  key={t.id}
+                  role="tabpanel"
+                  aria-labelledby={t.id}
+                >
+                  <div>
+                    <h3>{t.title}</h3>
+                    <p>{t.lead}</p>
+                    <ol>
+                      {t.steps.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div className="side">
+                    <a className="btn-phone" href={`tel:${tel}`}>
+                      Call {phone}
+                    </a>
+                    <p>{t.note}</p>
+                    <a className="more" href={t.more.href}>
+                      {t.more.label} &rarr;
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
